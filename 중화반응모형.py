@@ -25,7 +25,7 @@ def update_particles(acid_positions, base_positions, water_positions, reaction_e
         while j < len(base_positions):
             if np.linalg.norm(acid_positions[i] - base_positions[j]) < 0.05:  # Collision threshold
                 new_water_positions.append((acid_positions[i] + base_positions[j]) / 2)
-                new_effect_positions.append([acid_positions[i, 0], acid_positions[i, 1], 0.1])  # Initial effect size
+                new_effect_positions.append([acid_positions[i, 0], acid_positions[i, 1], 0.05])  # Initial effect size (reduced)
                 acid_positions = np.delete(acid_positions, i, axis=0)
                 base_positions = np.delete(base_positions, j, axis=0)
                 reacted_pairs += 1
@@ -47,8 +47,8 @@ def update_particles(acid_positions, base_positions, water_positions, reaction_e
 
     # Update existing reaction effects (increase size and fade out)
     if len(reaction_effects) > 0:
-        reaction_effects[:, 2] += 0.01  # Increase effect size
-        reaction_effects = reaction_effects[reaction_effects[:, 2] < 0.3]  # Remove effects that are too large
+        reaction_effects[:, 2] += 0.005  # Increase effect size (slower growth due to smaller size)
+        reaction_effects = reaction_effects[reaction_effects[:, 2] < 0.15]  # Remove effects that are too large
 
     # Random motion for remaining particles
     acid_positions += np.random.uniform(-0.03, 0.03, acid_positions.shape)
@@ -108,10 +108,14 @@ if st.button("반응 시작"):
             fig = plot_particles(acid_positions, base_positions, water_positions, reaction_effects)
 
             # Update table
+            reacted_acid_count = -(acid_count - len(acid_positions))  # Negative for reacted acids
+            reacted_base_count = -(base_count - len(base_positions))  # Negative for reacted bases
+            created_water_count = f"+{len(water_positions)}"  # Positive with + for water molecules
+
             results = {
                 "입자 종류": ["H⁺ (산)", "OH⁻ (염기)", "H₂O (물)"],
                 "초기 개수": [acid_count, base_count, 0],
-                "반응한 개수": [acid_count - len(acid_positions), base_count - len(base_positions), len(water_positions)],
+                "반응한 개수": [reacted_acid_count, reacted_base_count, created_water_count],
                 "남은 개수": [len(acid_positions), len(base_positions), len(water_positions)],
             }
             table_placeholder.table(pd.DataFrame(results))
