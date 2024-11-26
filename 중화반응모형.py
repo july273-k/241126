@@ -115,7 +115,7 @@ if st.button("반응 시작"):
             results = {
                 "입자 종류": ["H⁺ (산)", "OH⁻ (염기)", "H₂O (물)"],
                 "초기 개수": [acid_count, base_count, 0],
-                "반응한 개수": [reacted_acid_count, reacted_base_count, created_water_count],
+                "반응한(생성된) 개수": [reacted_acid_count, reacted_base_count, created_water_count],
                 "남은 개수": [len(acid_positions), len(base_positions), len(water_positions)],
             }
             table_placeholder.table(pd.DataFrame(results))
