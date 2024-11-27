@@ -12,8 +12,8 @@ def initialize_particles(acid_count, base_count):
     reaction_effects = np.empty((0, 3))  # [x, y, size] for reaction effects
     return acid_positions, base_positions, water_positions, reaction_effects
 
-# Update particle positions and simulate reaction with attraction
-def update_particles(acid_positions, base_positions, water_positions, reaction_effects, attraction_strength=0.01):
+# Update particle positions and simulate reaction with adjustable attraction
+def update_particles(acid_positions, base_positions, water_positions, reaction_effects, attraction_strength):
     reacted_pairs = 0
     new_water_positions = []
     new_effect_positions = []
@@ -89,19 +89,21 @@ def plot_particles(acid_positions, base_positions, water_positions, reaction_eff
         ax.add_patch(circle)
 
     ax.legend()
-    ax.set_title("Neutralization Reaction Simulation with Attraction")
+    ax.set_title("Neutralization Reaction Simulation with Adjustable Attraction")
     ax.axis("off")
     return fig
 
 # Streamlit App
 st.title("중화 반응 모형")
 
-st.sidebar.header("초기 반응 조건")
+st.sidebar.header("반응 초기 조건 설정")
 acid_count = st.sidebar.slider("Number of Acid Particles (H⁺)", 1, 50, 10, 1)
 base_count = st.sidebar.slider("Number of Base Particles (OH⁻)", 1, 50, 10, 1)
-attraction_strength = st.sidebar.slider("Attraction Strength", 0.001, 0.05, 0.01, 0.001)
 
-if st.button("반응 시작작"):
+# Attraction slider
+attraction_strength = st.sidebar.slider("Adjust Attraction Strength", 0.001, 0.05, 0.01, 0.001)
+
+if st.button("반응 시작"):
     with st.spinner("Running simulation..."):
         # Initialize particles
         acid_positions, base_positions, water_positions, reaction_effects = initialize_particles(acid_count, base_count)
@@ -112,6 +114,9 @@ if st.button("반응 시작작"):
 
         # Run the animation
         while len(acid_positions) > 0 and len(base_positions) > 0:  # Stop when all particles have reacted
+            # Update attraction strength in real-time
+            attraction_strength = st.sidebar.slider("Adjust Attraction Strength", 0.001, 0.05, 0.01, 0.001)
+
             acid_positions, base_positions, water_positions, reacted_pairs, reaction_effects = update_particles(
                 acid_positions, base_positions, water_positions, reaction_effects, attraction_strength
             )
@@ -134,5 +139,4 @@ if st.button("반응 시작작"):
             animation_placeholder.pyplot(fig)
             time.sleep(0.01)  # 1/100 second update time
 
-        st.success("반응이 완료됐습니다!")
-
+        st.success("Reaction completed!")
