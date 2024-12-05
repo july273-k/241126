@@ -66,6 +66,16 @@ elif selected_view == "주기율표 시각화":
     st.subheader("주기율표 시각화")
     st.write(f"선택한 속성: {selected_property}")
 
+# 결측치 처리
+    data = data.dropna(subset=["Atomic_Weight", "Electronegativity"], how="any")
+
+# 시각화 문제 해결
+    if data[selected_property].isnull().all():
+    st.error(f"선택한 속성 '{selected_property}'에 데이터가 없습니다.")
+else:
+    fig = px.scatter(data, x="Group", y="Period", size=selected_property, color=selected_property)
+    st.plotly_chart(fig)
+
     # 주기율표 시각화
     fig = px.scatter(data, x="Group", y="Period",
                      size=selected_property, color=selected_property,
