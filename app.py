@@ -30,12 +30,50 @@ def load_data():
     df.fillna(0, inplace=True)  # 결측값 처리
     return df
 
+# 데이터 불러오기
 df = load_data()
 
-# 선택 가능한 속성 목록
+# 페이지 구성
+st.title("통합형 주기율표 - 데이터 탐색과 시각화")
+
+# 인터랙티브 주기율표
+st.subheader("인터랙티브 주기율표")
 properties = ["Atomic_Mass", "Atomic_Radius", "Ionization_Energy", "Electronegativity", "Density", "Melting_Point", "Boiling_Point"]
+selected_property = st.selectbox("속성을 선택하세요", properties)
 
-# 레이아웃 구성
-upper, lower = st.columns([1, 1])
+fig1 = px.scatter(
+    df,
+    x="Group",
+    y="Period",
+    size=selected_property,
+    color="Electronegativity",
+    text="Symbol",
+    title=f"주기율표 - {selected_property}",
+    hover_data=["Element", "Atomic_Number", selected_property],
+    labels={"Group": "Group", "Period": "Period"},
+    size_max=60,
+)
+fig1.update_layout(
+    xaxis=dict(title="Group", dtick=1),
+    yaxis=dict(title="Period", dtick=1, autorange="reversed"),
+)
+st.plotly_chart(fig1)
 
-# 상단: 인터랙
+# 속성 그래프
+st.subheader("속성에 따른 주기적 경향성")
+selected_properties = st.multiselect("속성을 선택하세요 (최대 4개)", properties, default=properties[:2])
+
+if selected_properties:
+    for prop in selected_properties[:4]:  # 최대 4개의 그래프만 표시
+        fig2 = px.line(
+            df,
+            x="Atomic_Number",
+            y=prop,
+            text="Symbol",
+            title=f"{prop}의 주기적 경향성",
+            markers=True,
+            labels={"Atomic_Number": "Atomic Number", prop: prop},
+        )
+        st.plotly_chart(fig2)
+else:
+    st.warning("최소 하나 이상의 속성을 선택하세요.")
