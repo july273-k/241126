@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import plotly.express as px
 
-# 페이지 기본 설정 (코드의 가장 첫 번째 위치)
+# 페이지 기본 설정
 st.set_page_config(page_title="통합형 주기율표", layout="wide")
 
 # 데이터 로드
@@ -22,21 +22,57 @@ def load_data():
 
 df = load_data()
 
-# 사이드바 메뉴
-menu = st.sidebar.radio(
-    "메뉴 선택",
-    ["데이터 탐색", "주기적 경향성 분석", "과학적 개념 탐구", "나만의 주기율표 제작"]
-)
+# 페이지 제목
+st.title("통합형 주기율표 - 데이터 탐색과 시각화")
 
-# 1. 데이터 탐색
-if menu == "데이터 탐색":
-    st.title("원소 데이터 탐색")
-    st.write("아래는 원소 데이터를 탐색할 수 있는 테이블입니다.")
+# 레이아웃 구성
+col1, col2 = st.columns([1, 2])
+
+# 왼쪽: 데이터 탐색
+with col1:
+    st.subheader("데이터 탐색")
     st.dataframe(df)
 
-    st.write("선택한 원소의 상세 정보를 확인하세요.")
+    st.subheader("원소 상세 정보")
     element = st.selectbox("원소를 선택하세요", df["Element"].unique())
     info = df[df["Element"] == element]
     st.write(info)
 
-# 나머지 기능은 동일
+# 오른쪽: 시각화
+with col2:
+    st.subheader("주기적 경향성 분석")
+
+    # 속성 선택
+    property = st.selectbox("분석할 속성을 선택하세요", ["Electronegativity", "Atomic_Radius"])
+
+    # 주기적 경향성 그래프
+    fig1 = px.scatter(
+        df,
+        x="Atomic_Number",
+        y=property,
+        text="Symbol",
+        title=f"{property}의 주기적 경향성",
+        labels={"Atomic_Number": "Atomic Number", property: property},
+    )
+    fig1.update_traces(marker=dict(size=12))
+    st.plotly_chart(fig1, use_container_width=True)
+
+    st.subheader("인터랙티브 주기율표")
+    # 인터랙티브 주기율표
+    fig2 = px.scatter(
+        df,
+        x="Group",
+        y="Period",
+        size=property,
+        color="State",
+        text="Symbol",
+        title=f"주기율표 - {property}",
+        hover_data=["Element", "Atomic_Number", property],
+        labels={"Group": "Group", "Period": "Period"},
+        size_max=60,
+    )
+    fig2.update_layout(
+        xaxis=dict(title="Group", dtick=1),
+        yaxis=dict(title="Period", dtick=1, autorange="reversed"),
+    )
+    st.plotly_chart(fig2, use_container_width=True)
