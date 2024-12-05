@@ -38,93 +38,34 @@ def load_data():
             "Solid", "Solid", "Solid", "Solid", "Solid", "Solid", "Solid", "Solid", "Liquid", "Gas"
         ],
     }
-    return pd.DataFrame(data)
+    df = pd.DataFrame(data)
+    df.fillna(0, inplace=True)  # 결측값을 0으로 대체
+    return df
 
 df = load_data()
 
-# 페이지 제목
-st.title("통합형 주기율표 - 데이터 탐색과 시각화")
+# 데이터 탐색: 주기 선택
+st.subheader("데이터 탐색")
+period = st.selectbox("주기를 선택하세요", sorted(df["Period"].unique()))
+filtered_data = df[df["Period"] == period]
 
-# 네 구역 레이아웃
-upper_left, upper_right = st.columns([2, 2])
-lower_left, lower_right = st.columns([2, 2])
-
-# 좌측 상단: 인터랙티브 주기율표
-with upper_left:
-    st.subheader("인터랙티브 주기율표")
-    property = st.selectbox("속성을 선택하세요", ["Electronegativity", "Atomic_Radius"])
-    fig1 = px.scatter(
-        df,
-        x="Group",
-        y="Period",
-        size=property,
-        color="State",
-        text="Symbol",
-        title=f"주기율표 - {property}",
-        hover_data=["Element", "Atomic_Number", property],
-        labels={"Group": "Group", "Period": "Period"},
-        size_max=60,
-    )
-    fig1.update_layout(
-        xaxis=dict(title="Group", dtick=1),
-        yaxis=dict(title="Period", dtick=1, autorange="reversed"),
-    )
-    st.plotly_chart(fig1, use_container_width=True)
-
-# 우측 상단: 원소 데이터
-with upper_right:
-    st.subheader("원소 데이터 탐색")
-    period = st.selectbox("주기를 선택하세요", sorted(df["Period"].unique()))
-    filtered_data = df[df["Period"] == period]
-    st.write(f"**{period}주기 원소 데이터**")
+# 데이터가 비어 있는지 확인
+if filtered_data.empty:
+    st.error("선택한 주기에 해당하는 데이터가 없습니다.")
+else:
     st.dataframe(filtered_data)
 
-# 좌측 하단: 속성 1, 2 그래프
-with lower_left:
-    st.subheader("속성 1, 2의 주기적 경향성")
-    prop1 = st.selectbox("속성 1", ["Electronegativity", "Atomic_Radius"], key="prop1")
-    prop2 = st.selectbox("속성 2", ["Electronegativity", "Atomic_Radius"], key="prop2")
-    fig2 = px.line(
-        df,
-        x="Atomic_Number",
-        y=prop1,
-        title=f"{prop1}의 주기적 경향성",
-        markers=True,
-        labels={"Atomic_Number": "Atomic Number", prop1: prop1},
-    )
-    st.plotly_chart(fig2, use_container_width=True)
-
-    fig3 = px.line(
-        df,
-        x="Atomic_Number",
-        y=prop2,
-        title=f"{prop2}의 주기적 경향성",
-        markers=True,
-        labels={"Atomic_Number": "Atomic Number", prop2: prop2},
-    )
-    st.plotly_chart(fig3, use_container_width=True)
-
-# 우측 하단: 속성 3, 4 그래프
-with lower_right:
-    st.subheader("속성 3, 4의 주기적 경향성")
-    prop3 = st.selectbox("속성 3", ["Electronegativity", "Atomic_Radius"], key="prop3")
-    prop4 = st.selectbox("속성 4", ["Electronegativity", "Atomic_Radius"], key="prop4")
-    fig4 = px.line(
-        df,
-        x="Atomic_Number",
-        y=prop3,
-        title=f"{prop3}의 주기적 경향성",
-        markers=True,
-        labels={"Atomic_Number": "Atomic Number", prop3: prop3},
-    )
-    st.plotly_chart(fig4, use_container_width=True)
-
-    fig5 = px.line(
-        df,
-        x="Atomic_Number",
-        y=prop4,
-        title=f"{prop4}의 주기적 경향성",
-        markers=True,
-        labels={"Atomic_Number": "Atomic Number", prop4: prop4},
-    )
-    st.plotly_chart(fig5, use_container_width=True)
+# 인터랙티브 주기율표
+st.subheader("인터랙티브 주기율표")
+property = st.selectbox("속성을 선택하세요", ["Electronegativity", "Atomic_Radius"], key="property")
+fig = px.scatter(
+    df,
+    x="Group",
+    y="Period",
+    size=property,
+    color="State",
+    text="Symbol",
+    hover_data=["Element", "Atomic_Number", property],
+    labels={"Group": "Group", "Period": "Period"}
+)
+st.plotly_chart(fig)
