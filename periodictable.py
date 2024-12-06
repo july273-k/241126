@@ -1,5 +1,8 @@
 import streamlit as st
 import pandas as pd
+import matplotlib.pyplot as plt
+import seaborn as sns
+import plotly.express as px
 
 # 데이터 로드
 file_path = 'elementdatavalues.csv'  # 데이터 파일 경로
@@ -41,69 +44,73 @@ selected_property = st.selectbox("시각화할 성질을 선택하세요:", opti
 property_min = element_data[selected_property].dropna().min()
 property_max = element_data[selected_property].dropna().max()
 
-# 주기율표 배열 초기화
-grid_template = [[None for _ in range(18)] for _ in range(7)]
+# Matplotlib로 주기율표 시각화
+st.subheader("주기율표 시각화")
+fig, ax = plt.subplots(figsize=(12, 6))
 
-# 데이터 삽입
+# Plotting 원소별 데이터
 for _, row in element_data.iterrows():
     try:
         if pd.isna(row['Graph.Period']) or pd.isna(row['Graph.Group']):
             continue
-        period = int(row['Graph.Period']) - 1
-        group = int(row['Graph.Group']) - 1
+        period = int(row['Graph.Period'])
+        group = int(row['Graph.Group'])
 
-        # 유효한 범위 내에서 데이터 삽입
-        if 0 <= period < len(grid_template) and 0 <= group < len(grid_template[0]):
-            grid_template[period][group] = row
-    except (ValueError, IndexError):
-        st.warning(f"잘못된 데이터로 인해 {row['Symbol']}을(를) 추가할 수 없습니다.")
+        # 데이터 점 색상 매핑
+        value = row[selected_property]
+        color = sns.color_palette("coolwarm", as_cmap=True)((value - property_min) / (property_max - property_min)) if not pd.isna(value) else "gray"
 
-# 색상 매핑 함수
-def get_color(value, min_value, max_value):
-    if pd.isna(value):
-        return "#cccccc"  # 값이 없는 경우 회색
-    ratio = (value - min_value) / (max_value - min_value)
-    blue = int(255 * (1 - ratio))
-    red = int(255 * ratio)
-    return f"rgb({red}, 0, {blue})"
+        ax.scatter(group, period, s=300, color=color, edgecolors="black", alpha=0.8)
+        ax.text(group, period, row["Symbol"], ha="center", va="center", fontsize=10, color="white")
+    except Exception as e:
+        st.warning(f"데이터 오류: {row['Symbol']} - {e}")
 
-# HTML 생성
-table_html = """
-<style>
-.periodic-table {
-    display: grid;
-    grid-template-columns: repeat(18, minmax(40px, 1fr));
-    grid-gap: 5px;
-    text-align: center;
-    font-size: 12px;
-}
-.element {
-    border: 1px solid #aaa;
-    border-radius: 5px;
-    width: 60px;
-    height: 60px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    color: white;
-}
-</style>
-<div class="periodic-table">
-"""
+ax.set_xlim(0.5, 18.5)
+ax.set_ylim(0.5, 7.5)
+ax.set_xticks(range(1, 19))
+ax.set_yticks(range(1, 8))
+ax.set_xlabel("Group (족)")
+ax.set_ylabel("Period (주기)")
+ax.set_title(f"주기율표 ({valid_properties[selected_property]})", fontsize=16)
+ax.grid(True, linestyle="--", alpha=0.5)
 
-# 주기율표 HTML 렌더링
-for row in grid_template:
-    for cell in row:
-        if cell is None:
-            table_html += '<div class="element" style="background-color: #f1f1f1;"></div>'
-        else:
-            value = cell[selected_property]
-            color = get_color(value, property_min, property_max)
-            table_html += f'<div class="element" style="background-color: {color};">{cell["Symbol"]}</div>'
-table_html += "</div>"
+# Streamlit에 Matplotlib 그래프 표시
+st.pyplot(fig)
 
-# 주기율표 출력
-st.markdown(table_html, unsafe_allow_html=True)
+# Plotly로 상호작용 그래프 생성
+st.subheader("원소 특성 상호작용 그래프")
 
-# 선택
+# 선택한 성질을 기준으로 데이터 시각화
+fig = px.scatter(
+    element_data,
+    x="Atomic_Number",
+    y=selected_property,
+    hover_name="Name",
+    hover_data=["Symbol", "Electronegativity", "Atomic_Radius", "Ionization_Energy"],
+    color=selected_property,
+    color_continuous_scale="Viridis",
+    title=f"{valid_properties[selected_property]}에 따른 원소 분포",
+    labels={"Atomic_Number": "원자번호", selected_property: valid_properties[selected_property]}
+)
+
+# Streamlit에 Plotly 그래프 표시
+st.plotly_chart(fig)
+
+# 사용자 선택 원소 데이터
+st.subheader("원소 데이터 탐색")
+selected_symbol = st.selectbox("원소를 선택하세요:", element_data["Symbol"].sort_values())
+selected_row = element_data[element_data["Symbol"] == selected_symbol].iloc[0]
+
+# 선택된 원소 데이터 출력
+value_display = selected_row[selected_property]
+value_display = "데이터 없음" if pd.isna(value_display) else value_display
+
+st.markdown(f"""
+**선택한 원소 정보**
+- **이름**: {selected_row['Name']}
+- **기호**: {selected_row['Symbol']}
+- **원자번호**: {selected_row['Atomic_Number']}
+- **족(Group)**: {selected_row['Graph.Group']}
+- **주기(Period)**: {selected_row['Graph.Period']}
+- **{valid_properties[selected_property]}**: {value_display}
+""")
