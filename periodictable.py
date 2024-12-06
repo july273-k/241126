@@ -27,9 +27,9 @@ property_options = {
 }
 selected_property = st.selectbox("시각화할 성질을 선택하세요:", options=property_options.keys(), format_func=lambda x: property_options[x])
 
-# 데이터 전처리: 범위 계산
-property_min = element_data[selected_property].min()
-property_max = element_data[selected_property].max()
+# 데이터 전처리: 범위 계산 (NaN 처리)
+property_min = element_data[selected_property].dropna().min()
+property_max = element_data[selected_property].dropna().max()
 
 # 주기율표 배열 초기화
 grid_template = [["" for _ in range(18)] for _ in range(7)]
@@ -57,7 +57,7 @@ table_html = f"""
 <style>
 .periodic-table {{
     display: grid;
-    grid-template-columns: repeat(18, 60px);
+    grid-template-columns: repeat(18, minmax(40px, 1fr));
     grid-gap: 5px;
     text-align: center;
     font-size: 12px;
@@ -99,11 +99,15 @@ st.write(f"최대값: {property_max}")
 selected_symbol = st.selectbox("원소를 선택하세요:", element_data["Symbol"].sort_values())
 selected_row = element_data[element_data["Symbol"] == selected_symbol].iloc[0]
 
+# 선택된 성질 값 처리
+value_display = selected_row[selected_property]
+value_display = "데이터 없음" if pd.isna(value_display) else value_display
+
 # 선택된 원소 데이터 출력
 st.markdown(f"""
 **선택한 원소 정보**
 - **이름**: {selected_row['Name']}
 - **기호**: {selected_row['Symbol']}
 - **원자번호**: {selected_row['Atomic_Number']}
-- **{property_options[selected_property]}**: {selected_row[selected_property]}
+- **{property_options[selected_property]}**: {value_display}
 """)
