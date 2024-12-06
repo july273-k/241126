@@ -9,25 +9,35 @@ except FileNotFoundError:
     st.error("데이터 파일을 찾을 수 없습니다. 파일 경로를 확인하세요.")
     st.stop()
 
-# 필수 컬럼 확인
+# 필수 열 목록
 required_columns = ["Name", "Symbol", "Atomic_Number", "Graph.Period", "Graph.Group", "Electronegativity", "Atomic_Radius", "Ionization_Energy"]
+
+# 누락된 열 확인 및 처리
 missing_columns = [col for col in required_columns if col not in element_data.columns]
 
 if missing_columns:
-    st.error(f"데이터 파일에 누락된 컬럼이 있습니다: {', '.join(missing_columns)}")
-    st.stop()
+    for col in missing_columns:
+        st.warning(f"데이터 파일에 누락된 열이 있습니다: {col}. 기본값 NaN으로 추가합니다.")
+        element_data[col] = float('nan')  # NaN 값으로 누락된 열 추가
 
-st.title("Interactive Periodic Table: Periodic Properties Visualization")
-
-# 사용자 선택: 시각화할 성질
-property_options = {
+# 시각화 가능한 성질 정의
+available_properties = {
     "Electronegativity": "전기음성도",
     "Atomic_Radius": "원자 반지름 (pm)",
     "Ionization_Energy": "이온화 에너지 (kJ/mol)"
 }
-selected_property = st.selectbox("시각화할 성질을 선택하세요:", options=property_options.keys(), format_func=lambda x: property_options[x])
 
-# 데이터 전처리: 범위 계산 (NaN 처리)
+# 데이터셋에 존재하는 열만 선택
+valid_properties = {key: value for key, value in available_properties.items() if key in element_data.columns}
+
+if not valid_properties:
+    st.error("데이터셋에 시각화할 성질이 없습니다. 데이터 파일을 확인하세요.")
+    st.stop()
+
+# 사용자 선택: 시각화할 성질
+selected_property = st.selectbox("시각화할 성질을 선택하세요:", options=valid_properties.keys(), format_func=lambda x: valid_properties[x])
+
+# 데이터 전처리: 범위 계산 (NaN 값 제외)
 property_min = element_data[selected_property].dropna().min()
 property_max = element_data[selected_property].dropna().max()
 
@@ -91,7 +101,7 @@ table_html += "</div>"
 st.markdown(table_html, unsafe_allow_html=True)
 
 # 선택한 성질에 대한 범례 출력
-st.markdown(f"### {property_options[selected_property]} 값 범위")
+st.markdown(f"### {valid_properties[selected_property]} 값 범위")
 st.write(f"최소값: {property_min}")
 st.write(f"최대값: {property_max}")
 
@@ -109,5 +119,5 @@ st.markdown(f"""
 - **이름**: {selected_row['Name']}
 - **기호**: {selected_row['Symbol']}
 - **원자번호**: {selected_row['Atomic_Number']}
-- **{property_options[selected_property]}**: {value_display}
+- **{valid_properties[selected_property]}**: {value_display}
 """)
