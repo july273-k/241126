@@ -10,17 +10,16 @@ except FileNotFoundError:
     st.stop()
 
 # 필수 컬럼 확인
-required_columns = ["Name", "Symbol", "Atomic_Number", "Atomic_Weight", "Graph.Period", "Graph.Group", "Phase", "Density", "Melting_Point", "Boiling_Point"]
+required_columns = ["Name", "Symbol", "Atomic_Number", "Atomic_Weight", "Graph.Period", "Graph.Group", "Phase"]
 missing_columns = [col for col in required_columns if col not in element_data.columns]
 
 if missing_columns:
     st.error(f"데이터 파일에 누락된 컬럼이 있습니다: {', '.join(missing_columns)}")
     st.stop()
 
-# Streamlit 앱 시작
 st.title("Interactive Periodic Table")
 
-# 안전한 인덱스 접근
+# 안전한 데이터 접근
 if element_data.empty:
     st.error("데이터가 비어 있습니다. 데이터를 확인하세요.")
     st.stop()
@@ -46,21 +45,25 @@ st.markdown(f"""
 - **족**: {int(selected_element['Graph.Group'])}
 - **주기**: {int(selected_element['Graph.Period'])}
 - **상태**: {selected_element['Phase']}
-- **밀도**: {selected_element['Density']} g/cm³
-- **녹는점**: {selected_element['Melting_Point']} K
-- **끓는점**: {selected_element['Boiling_Point']} K
 """)
 
-# 주기율표 생성
+# 주기율표 배열 초기화
 grid_template = [["" for _ in range(18)] for _ in range(7)]
 
+# 배열에 데이터 삽입
 for _, row in element_data.iterrows():
     try:
-        period = int(row['Graph.Period']) - 1  # 0부터 시작하는 인덱스로 변환
-        group = int(row['Graph.Group']) - 1   # 0부터 시작하는 인덱스로 변환
+        period = int(row['Graph.Period']) - 1  # 0부터 시작하는 인덱스
+        group = int(row['Graph.Group']) - 1   # 0부터 시작하는 인덱스
+
+        # 유효성 검증
+        if not (0 <= period < 7 and 0 <= group < 18):
+            st.warning(f"잘못된 위치 정보: {row['Symbol']} (Period: {row['Graph.Period']}, Group: {row['Graph.Group']})")
+            continue
+
         grid_template[period][group] = row['Symbol']
-    except ValueError:
-        st.warning(f"데이터 오류: {row['Symbol']}의 위치 정보를 확인하세요.")
+    except (ValueError, IndexError) as e:
+        st.warning(f"데이터 오류: {row['Symbol']} - {e}")
 
 # 주기율표 HTML 생성
 table_html = """
