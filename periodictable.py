@@ -42,16 +42,21 @@ property_min = element_data[selected_property].dropna().min()
 property_max = element_data[selected_property].dropna().max()
 
 # 주기율표 배열 초기화
-grid_template = [["" for _ in range(18)] for _ in range(7)]
+grid_template = [[None for _ in range(18)] for _ in range(7)]
 
 # 데이터 삽입
 for _, row in element_data.iterrows():
     try:
-        period = int(row['Graph.Period']) - 1  # 0부터 시작하는 인덱스
-        group = int(row['Graph.Group']) - 1   # 0부터 시작하는 인덱스
-        grid_template[period][group] = row
+        if pd.isna(row['Graph.Period']) or pd.isna(row['Graph.Group']):
+            continue
+        period = int(row['Graph.Period']) - 1
+        group = int(row['Graph.Group']) - 1
+
+        # 유효한 범위 내에서 데이터 삽입
+        if 0 <= period < len(grid_template) and 0 <= group < len(grid_template[0]):
+            grid_template[period][group] = row
     except (ValueError, IndexError):
-        continue
+        st.warning(f"잘못된 데이터로 인해 {row['Symbol']}을(를) 추가할 수 없습니다.")
 
 # 색상 매핑 함수
 def get_color(value, min_value, max_value):
@@ -63,16 +68,16 @@ def get_color(value, min_value, max_value):
     return f"rgb({red}, 0, {blue})"
 
 # HTML 생성
-table_html = f"""
+table_html = """
 <style>
-.periodic-table {{
+.periodic-table {
     display: grid;
     grid-template-columns: repeat(18, minmax(40px, 1fr));
     grid-gap: 5px;
     text-align: center;
     font-size: 12px;
-}}
-.element {{
+}
+.element {
     border: 1px solid #aaa;
     border-radius: 5px;
     width: 60px;
@@ -82,14 +87,15 @@ table_html = f"""
     justify-content: center;
     font-weight: bold;
     color: white;
-}}
+}
 </style>
 <div class="periodic-table">
 """
 
+# 주기율표 HTML 렌더링
 for row in grid_template:
     for cell in row:
-        if cell == "":
+        if cell is None:
             table_html += '<div class="element" style="background-color: #f1f1f1;"></div>'
         else:
             value = cell[selected_property]
@@ -100,24 +106,4 @@ table_html += "</div>"
 # 주기율표 출력
 st.markdown(table_html, unsafe_allow_html=True)
 
-# 선택한 성질에 대한 범례 출력
-st.markdown(f"### {valid_properties[selected_property]} 값 범위")
-st.write(f"최소값: {property_min}")
-st.write(f"최대값: {property_max}")
-
-# 사용자 선택 원소 데이터
-selected_symbol = st.selectbox("원소를 선택하세요:", element_data["Symbol"].sort_values())
-selected_row = element_data[element_data["Symbol"] == selected_symbol].iloc[0]
-
-# 선택된 성질 값 처리
-value_display = selected_row[selected_property]
-value_display = "데이터 없음" if pd.isna(value_display) else value_display
-
-# 선택된 원소 데이터 출력
-st.markdown(f"""
-**선택한 원소 정보**
-- **이름**: {selected_row['Name']}
-- **기호**: {selected_row['Symbol']}
-- **원자번호**: {selected_row['Atomic_Number']}
-- **{valid_properties[selected_property]}**: {value_display}
-""")
+# 선택
