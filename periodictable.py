@@ -42,19 +42,33 @@ st.markdown(f"""
 - **기호**: {selected_element['Symbol']}
 - **원자번호**: {selected_element['Atomic_Number']}
 - **원자량**: {selected_element['Atomic_Weight']}
-- **족**: {int(selected_element['Graph.Group'])}
-- **주기**: {int(selected_element['Graph.Period'])}
+- **족**: {selected_element['Graph.Group']}
+- **주기**: {selected_element['Graph.Period']}
 - **상태**: {selected_element['Phase']}
 """)
 
 # 주기율표 배열 초기화
 grid_template = [["" for _ in range(18)] for _ in range(7)]
+lanthanides = []
+actinides = []
 
 # 배열에 데이터 삽입
 for _, row in element_data.iterrows():
     try:
-        period = int(row['Graph.Period']) - 1  # 0부터 시작하는 인덱스
-        group = int(row['Graph.Group']) - 1   # 0부터 시작하는 인덱스
+        period = row['Graph.Period']
+        group = row['Graph.Group']
+
+        # 란타넘족과 악티늄족 처리
+        if period == 8.5:
+            lanthanides.append(row['Symbol']) if group <= 17 else None
+            continue
+        elif period == 9.5:
+            actinides.append(row['Symbol']) if group <= 17 else None
+            continue
+
+        # 일반 원소 처리
+        period = int(period) - 1  # 0부터 시작하는 인덱스
+        group = int(group) - 1   # 0부터 시작하는 인덱스
 
         # 유효성 검증
         if not (0 <= period < 7 and 0 <= group < 18):
@@ -98,5 +112,12 @@ table_html += "</div>"
 
 # 주기율표 렌더링
 st.markdown(table_html, unsafe_allow_html=True)
+
+# 란타넘족과 악티늄족 렌더링
+st.markdown("### Lanthanides (란타넘족)")
+st.write(", ".join(lanthanides))
+
+st.markdown("### Actinides (악티늄족)")
+st.write(", ".join(actinides))
 
 st.write("선택한 원소는 노란색으로 강조 표시됩니다.")
