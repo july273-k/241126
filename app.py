@@ -6,7 +6,7 @@ import plotly.express as px
 st.set_page_config(page_title="통합형 주기율표", layout="wide")
 
 # 데이터 로드
-@st.cache
+@st.cache_data  # 최신 Streamlit에서는 st.cache 대신 st.cache_data 사용
 def load_data():
     data = {
         "Element": [
