@@ -6,6 +6,7 @@ st.set_page_config(layout="wide")
 
 # 헨더슨-하셀바흐 식: pH = pKa + log([A-]/[HA])
 pKa = 4.76
+kw = 1e-14  # 물의 이온 곱 (25°C에서)
 
 st.title("완충용액 공통 이온 효과 시뮬레이션")
 
@@ -17,7 +18,7 @@ st.write("""
 - **조작**: 산(HCl), 염기(NaOH), 염(NaA)를 일정 농도로 추가 후 변화된 pH와 이온 농도를 확인  
 - **시각화**:  
    1) 막대 그래프: HA와 A⁻의 최종 농도  
-   2) 이온 모형: HA와 A⁻ 이온을 점으로 나타내어 상대적 개수를 시각적으로 표현
+   2) 이온 모형: HA, A⁻, H⁺, OH⁻ 이온의 상대적 개수를 점으로 표현
 """)
 
 # 사이드바 설정 영역
@@ -64,7 +65,7 @@ if add_species == "강염기(NaOH)" and added_amount > 0:
 if add_species == "아세트산나트륨(NaA)" and added_amount > 0:
     A = A + added_amount
 
-# pH 계산 로직
+# pH 계산
 if add_species == "강염기(NaOH)" and added_amount > 0:
     delta = min(initial_HA, added_amount)
     leftover_OH = added_amount - delta
@@ -103,6 +104,10 @@ else:
             elif HA <= 0:
                 pH = 14
 
+# H⁺와 OH⁻ 농도 계산
+H_conc = 10**(-pH) * 1e3  # mM 단위
+OH_conc = (kw / (10**(-pH))) * 1e3  # mM 단위
+
 # 결과 표시
 st.subheader("결과")
 col1, col2 = st.columns(2)
@@ -110,15 +115,17 @@ with col1:
     st.write(f"**최종 pH**: {pH:.2f}")
     st.write(f"**최종 HA 농도**: {HA:.2f} mM")
     st.write(f"**최종 A⁻ 농도**: {A:.2f} mM")
+    st.write(f"**최종 H⁺ 농도**: {H_conc:.2e} mM")
+    st.write(f"**최종 OH⁻ 농도**: {OH_conc:.2e} mM")
 
 # 농도 막대 그래프
 with col2:
     fig, ax = plt.subplots(figsize=(4,3))
-    ions = ["HA", "A⁻"]
-    concs = [HA, A]
-    ax.bar(ions, concs, color=["red", "blue"])
+    ions = ["HA", "A⁻", "H⁺", "OH⁻"]
+    concs = [HA, A, H_conc, OH_conc]
+    ax.bar(ions, concs, color=["red", "blue", "green", "purple"])
     ax.set_ylabel("농도 (mM)")
-    ax.set_title("HA와 A⁻ 농도 변화")
+    ax.set_title("HA, A⁻, H⁺, OH⁻ 농도 변화")
     st.pyplot(fig)
 
 st.write("---")
@@ -130,19 +137,28 @@ st.subheader("이온 모형 (상대적 개수 표현)")
 max_points = 100
 HA_points = int(min(max_points, HA))
 A_points = int(min(max_points, A))
+H_points = int(min(max_points, H_conc))
+OH_points = int(min(max_points, OH_conc))
 
-# HA 이온 위치 (랜덤)
+# 이온 위치 (랜덤)
 np.random.seed(42)
-HA_x = np.random.rand(HA_points) * 0.5  # 0~0.5 구간
+HA_x = np.random.rand(HA_points) * 0.25  # 0~0.25 구간
 HA_y = np.random.rand(HA_points)
 
-# A 이온 위치 (랜덤, 다른 영역)
-A_x = 0.5 + np.random.rand(A_points) * 0.5  # 0.5~1 구간
+A_x = 0.25 + np.random.rand(A_points) * 0.25  # 0.25~0.5 구간
 A_y = np.random.rand(A_points)
+
+H_x = 0.5 + np.random.rand(H_points) * 0.25  # 0.5~0.75 구간
+H_y = np.random.rand(H_points)
+
+OH_x = 0.75 + np.random.rand(OH_points) * 0.25  # 0.75~1 구간
+OH_y = np.random.rand(OH_points)
 
 fig2, ax2 = plt.subplots(figsize=(6,3))
 ax2.scatter(HA_x, HA_y, c='red', alpha=0.6, label='HA')
 ax2.scatter(A_x, A_y, c='blue', alpha=0.6, label='A⁻')
+ax2.scatter(H_x, H_y, c='green', alpha=0.6, label='H⁺')
+ax2.scatter(OH_x, OH_y, c='purple', alpha=0.6, label='OH⁻')
 ax2.set_xticks([])
 ax2.set_yticks([])
 ax2.set_xlim(0,1)
@@ -153,9 +169,9 @@ st.pyplot(fig2)
 
 st.write("""
 **해석**:  
-- **막대 그래프**는 최종 HA와 A⁻ 농도를 보여줍니다.  
-- **이온 모형**은 HA와 A⁻ 이온 수를 점으로 나타내어 농도가 높을수록 더 많은 점이 나타납니다.  
-- 산(강산) 추가: A⁻를 HA로 전환, pH 하락  
-- 염기(강염기) 추가: HA를 A⁻로 전환, pH 상승 (완충 영역 벗어나면 극단적 변화)  
-- 공통 이온(A⁻) 추가: 평형 이동으로 인해 pH 변화 최소화 (공통 이온 효과)
+- **막대 그래프**는 최종 HA, A⁻, H⁺, OH⁻ 농도를 보여줍니다.  
+- **이온 모형**은 각 이온 수를 점으로 나타내어 농도가 높을수록 더 많은 점이 나타납니다.  
+- 산(HCl) 추가 시: A⁻는 감소하고 HA와 H⁺가 증가  
+- 염기(NaOH) 추가 시: HA는 감소하고 A⁻와 OH⁻가 증가  
+- 공통 이온(A⁻) 추가 시: 완충 영역 내에서 평형 이동으로 인해 pH 변화 최소화
 """)
