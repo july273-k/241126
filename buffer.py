@@ -20,11 +20,10 @@ st.write("""
    2) 이온 모형: HA와 A⁻ 이온을 점으로 나타내어 상대적 개수를 시각적으로 표현
 """)
 
-
 # 사이드바 설정 영역
 st.sidebar.header("초기 조건 및 추가물질 설정")
 
-col_init = st.sidebar.beta_expander("초기 농도 설정", expanded=True)
+col_init = st.sidebar.expander("초기 농도 설정", expanded=True)
 with col_init:
     initial_HA_slider = st.slider("초기 HA 농도 (mM)", min_value=1.0, max_value=100.0, value=50.0)
     initial_HA_input = st.number_input("직접 입력 (초기 HA, mM)", value=initial_HA_slider, min_value=1.0, max_value=100.0)
@@ -34,7 +33,7 @@ with col_init:
     initial_A_input = st.number_input("직접 입력 (초기 A⁻, mM)", value=initial_A_slider, min_value=1.0, max_value=100.0)
     initial_A = initial_A_input
 
-col_add = st.sidebar.beta_expander("물질 추가", expanded=True)
+col_add = st.sidebar.expander("물질 추가", expanded=True)
 with col_add:
     add_species = st.selectbox("추가할 물질 선택", ["None", "강산(HCl)", "강염기(NaOH)", "아세트산나트륨(NaA)"])
     added_amount_slider = st.slider("추가량 (mM)", min_value=0.0, max_value=100.0, value=0.0, step=1.0)
@@ -52,7 +51,6 @@ if add_species == "강산(HCl)" and added_amount > 0:
     HA = HA + delta
     leftover_H = added_amount - delta
     if leftover_H > 0:
-        # 남은 H+를 HA 증가로 근사
         HA += leftover_H
 
 # 강염기(NaOH) 추가
@@ -68,11 +66,9 @@ if add_species == "아세트산나트륨(NaA)" and added_amount > 0:
 
 # pH 계산 로직
 if add_species == "강염기(NaOH)" and added_amount > 0:
-    # leftover_OH 재계산
-    delta = min(initial_HA, added_amount)  # 초기 HA와 비교한 반응량 고려(간략화)
+    delta = min(initial_HA, added_amount)
     leftover_OH = added_amount - delta
     if leftover_OH > 0:
-        # 매우 염기성
         OH_conc = leftover_OH * 1e-3
         pOH = -np.log10(OH_conc)
         pH = 14 - pOH
@@ -80,7 +76,6 @@ if add_species == "강염기(NaOH)" and added_amount > 0:
         if A > 0 and HA > 0:
             pH = pKa + np.log10(A/HA)
         else:
-            # 극단상황 처리
             if A <= 0:
                 pH = 0
             elif HA <= 0:
@@ -89,7 +84,6 @@ else:
     if add_species == "강산(HCl)" and added_amount > 0:
         leftover_H = added_amount - min(initial_A, added_amount)
         if leftover_H > 0:
-            # 매우 산성
             H_conc = leftover_H * 1e-3
             pH = -np.log10(H_conc)
         else:
@@ -111,7 +105,7 @@ else:
 
 # 결과 표시
 st.subheader("결과")
-col1, col2 = st.beta_columns(2)
+col1, col2 = st.columns(2)
 with col1:
     st.write(f"**최종 pH**: {pH:.2f}")
     st.write(f"**최종 HA 농도**: {HA:.2f} mM")
@@ -133,7 +127,6 @@ st.write("---")
 st.subheader("이온 모형 (상대적 개수 표현)")
 
 # 이온 개수를 시각적으로 표현하기 위해 농도에 비례한 개수의 점을 찍는다.
-# 너무 많은 점을 찍으면 화면이 복잡하므로 최대 개수를 제한.
 max_points = 100
 HA_points = int(min(max_points, HA))
 A_points = int(min(max_points, A))
