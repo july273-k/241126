@@ -3,7 +3,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 
 # 데이터 로드
-file_path = elements_data.csv'
+file_path = "elements_data.csv"
 elements = pd.read_csv(file_path)
 
 # 메인 타이틀
