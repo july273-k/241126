@@ -17,7 +17,7 @@ with tab1:
     1854년 크림 전쟁 당시 나이팅게일은 군 병원의 위생 상태를 개선하기 위해 로즈 다이어그램을 활용했습니다.
     이를 통해 사망 원인을 시각적으로 보여주어 위생 환경 개선에 기여했습니다.
     """)
-    st.image("nightingale_rose_diagram.jpg", caption="나이팅게일의 로즈 다이어그램")
+    st.image("nightingale_rose_diagram.png", caption="나이팅게일의 로즈 다이어그램")
     
     st.subheader("존 스노우의 콜레라 지도")
     st.write("""
