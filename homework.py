@@ -2,6 +2,10 @@ import streamlit as st
 import pandas as pd
 import matplotlib.pyplot as plt
 
+# 데이터 로드
+file_path = '/mnt/data/elements_data.csv'
+elements = pd.read_csv(file_path)
+
 # 메인 타이틀
 st.title("데이터와 과학적 탐구를 통한 주기적 경향성 학습")
 
@@ -38,13 +42,15 @@ with tab2:
     st.subheader("원소 데이터 시각화")
     st.write("아래 데이터를 활용하여 원소의 속성을 선택하고 그래프를 확인하세요.")
     
-    elements = pd.read_csv("elements_data.csv")  # 원소 데이터 불러오기
-    property_choice = st.selectbox("속성 선택", ["원자량", "밀도", "녹는점", "끓는점", "원자 반지름", "이온화 에너지", "전기 음성도"])
+    property_choice = st.selectbox(
+        "속성 선택", 
+        ["Atomic_Weight", "Density", "Melting_Point", "Boiling_Point", "Atomic_Radius", "Electronegativity"]
+    )
     
     fig, ax = plt.subplots()
-    ax.plot(elements["원소 번호"], elements[property_choice])
+    ax.plot(elements["Atomic_Number"], elements[property_choice])
     ax.set_title(f"{property_choice} 변화")
-    ax.set_xlabel("원소 번호")
+    ax.set_xlabel("Atomic Number (원소 번호)")
     ax.set_ylabel(property_choice)
     st.pyplot(fig)
     
