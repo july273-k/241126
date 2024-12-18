@@ -6,37 +6,6 @@ from oauth2client.service_account import ServiceAccountCredentials
 import plotly.express as px
 import base64
 
-# ------------------------------------------------------------
-# Google Sheets API 설정 (예시)
-SCOPE = ["https://spreadsheets.google.com/feeds",
-         "https://www.googleapis.com/auth/spreadsheets",
-         "https://www.googleapis.com/auth/drive.file",
-         "https://www.googleapis.com/auth/drive"]
-CREDS_JSON = "credentials.json"  # 서비스계정 키 파일명 (실사용 시 교체)
-SHEET_ID = "YOUR_GOOGLE_SHEET_ID"  # 본인 구글 시트 ID로 교체
-# ------------------------------------------------------------
-
-st.set_page_config(page_title="데이터 시각화 학습 활동", layout="wide")
-
-# Session state 초기화
-if "logged_in" not in st.session_state:
-    st.session_state.logged_in = False
-if "user_info" not in st.session_state:
-    st.session_state.user_info = {}
-if "is_teacher" not in st.session_state:
-    st.session_state.is_teacher = False
-
-# Google Sheet 접근 함수
-def get_worksheet(sheet_name):
-    creds = ServiceAccountCredentials.from_json_keyfile_name(CREDS_JSON, SCOPE)
-    client = gspread.authorize(creds)
-    sheet = client.open_by_key(SHEET_ID)
-    wks = sheet.worksheet(sheet_name)
-    return wks
-
-def save_data_to_gsheet(sheet_name, data_dict):
-    wks = get_worksheet(sheet_name)
-    wks.append_row(list(data_dict.values()))  # 데이터 저장
 
 # 로그인 화면
 def login_page():
