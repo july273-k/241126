@@ -1,104 +1,68 @@
 import streamlit as st
 
-st.set_page_config(page_title="데이터 시각화 학습 활동지", layout="wide")
+# 페이지 제목
+st.title("데이터 시각화 기반 학습 활동")
+st.sidebar.title("활동 선택")
+activity = st.sidebar.radio("활동을 선택하세요", ["활동 1: 역사적 사례 탐구", "활동 2: 데이터 시각화 기법 이해하기", "활동 3: 시각화 결과 공유 및 개선"])
 
-# 사이드바 메뉴
-page = st.sidebar.selectbox("페이지 선택", ["활동1: 역사적 사례 탐구", "활동2: 데이터 시각화 기법 이해", "활동3: 시각화 결과 공유 및 개선"])
-
-if page == "활동1: 역사적 사례 탐구":
-    st.title("활동1: 역사적 사례를 통한 데이터 시각화 중요성 탐구")
-    st.write("**이름:** (입력란)")
-    st.write("**모둠:** (입력란)")
-    st.write("**일자:** (입력란)")
-
-# 나이팅게일의 로즈 다이어그램 이미지
+# 활동 1: 역사적 사례 탐구
+if activity == "활동 1: 역사적 사례 탐구":
+    st.header("활동 1: 역사적 사례 탐구")
     st.subheader("A. 나이팅게일의 로즈 다이어그램 관찰하기")
-
-# 이미지 삽입 (이미지를 base64로 인코딩하거나, static 폴더 사용 가능)
-    rose_img_path = "nightingale_rose_diagram.png"  # 예: 같은 폴더 내 이미지
-    st.text_area("관찰 포인트 (예: 원형 패턴, 색상, 시간 추이 등)", "")
-    st.write("2. 이 다이어그램을 통해 나이팅게일이 전달하려 한 메시지와 시각화의 이점을 생각해보세요.")
-    st.text_area("전달 메시지 및 이점", "")
-
+    name = st.text_input("이름")
+    group = st.text_input("모둠")
+    date = st.date_input("일자")
+    
+    st.write("### 1. 로즈 다이어그램 살펴보기")
+    st.text_area("다이어그램에서 눈에 띄는 특징을 적어보세요 (예: 원형 패턴, 각 구역별 크기 차이, 색상의 의미 등)", key="rose_diagram_features")
+    st.text_area("관찰 포인트를 작성하세요 (색상/모양/크기, 시간적 변화나 추세 등)", key="rose_diagram_observation")
+    
+    st.write("### 2. 로즈 다이어그램의 의미 해석")
+    st.text_area("로즈 다이어그램의 메시지를 분석하세요", key="rose_diagram_message")
+    st.text_area("시각화의 이점을 정리하세요", key="rose_diagram_advantages")
+    
     st.subheader("B. 존 스노우의 콜레라 지도 분석하기")
-    snow_map_path = "john_snow_cholera_map.png" 
-    st.write("1. 지도 이미지 관찰: 지도 위에 어떤 정보가 표시되어 있나요?")
-    st.text_area("지도 관찰 포인트 (우물 위치, 환자 발생 가구 등)", "")
-    st.write("2. 시각화가 콜레라 확산 원인을 파악하는 데 어떤 도움을 주었나요?")
-    st.text_area("지도 시각화의 도움", "")
-
+    st.write("### 1. 콜레라 지도 살펴보기")
+    st.text_area("지도에서 눈에 띄는 점을 적어보세요 (예: 특정 지역 내 우물 위치, 발병 가구 표시 등)", key="cholera_map_features")
+    st.text_area("연관성 있는 요소들을 작성하세요", key="cholera_map_relations")
+    
+    st.write("### 2. 지도를 통한 원인 파악")
+    st.text_area("콜레라 확산의 원인을 지도에서 어떻게 추론했는지 작성하세요", key="cholera_cause_analysis")
+    st.text_area("지도 시각화의 중요성을 작성하세요", key="cholera_visualization_importance")
+    
     st.subheader("C. 종합 질문")
-    st.write("1. 로즈 다이어그램과 콜레라 지도에서 공통적으로 발견되는 데이터 시각화의 장점을 정리해보세요.")
-    st.text_area("데이터 시각화 공통 장점", "")
-    st.write("2. 수치 데이터만 제시될 때와 시각화가 제공될 때의 차이를 비교해보세요.")
-    st.text_area("비교 (수치만 vs 시각화)", "")
+    st.text_area("로즈 다이어그램과 콜레라 지도에서 공통적으로 발견되는 시각화의 장점을 정리하세요", key="common_visualization_advantages")
+    st.text_area("수치 데이터와 시각화 데이터의 차이를 비교하세요", key="data_comparison")
 
-
-elif page == "활동2: 데이터 시각화 기법 이해":
-    st.title("활동2: 다양한 데이터 시각화 기법 이해 및 적용")
-    st.write("**이름:** (입력란)")
-    st.write("**모둠:** (입력란)")
-    st.write("**일자:** (입력란)")
-
-    st.subheader("A. 다양한 시각화 기법 이해")
-    st.write("아래 표를 참조하여 각 기법의 특징과 활용 상황을 정리해보세요.")
-
-    st.markdown("""
-    | 시각화 기법 | 특징 | 주로 활용하는 상황 | 장점 | 단점 |
-    |-------------|-------|-------------------|------|------|
-    | 막대 그래프  | (입력) | (입력) | (입력) | (입력) |
-    | 파이 차트    | (입력) | (입력) | (입력) | (입력) |
-    | 선 그래프    | (입력) | (입력) | (입력) | (입력) |
-    | 히트맵(지도) | (입력) | (입력) | (입력) | (입력) |
-    | 네트워크 다이어그램 | (입력) | (입력) | (입력) | (입력) |
-    """)
-
+# 활동 2: 데이터 시각화 기법 이해하기
+elif activity == "활동 2: 데이터 시각화 기법 이해하기":
+    st.header("활동 2: 데이터 시각화 기법 이해하기")
+    st.text_area("막대 그래프의 특징, 장단점, 활용 사례를 적어보세요", key="bar_chart")
+    st.text_area("파이 차트의 특징, 장단점, 활용 사례를 적어보세요", key="pie_chart")
+    st.text_area("선 그래프의 특징, 장단점, 활용 사례를 적어보세요", key="line_chart")
+    st.text_area("히트맵의 특징, 장단점, 활용 사례를 적어보세요", key="heatmap")
+    st.text_area("네트워크 다이어그램의 특징, 장단점, 활용 사례를 적어보세요", key="network_diagram")
+    
     st.subheader("B. 데이터 시각화 실습 준비")
-    st.write("아래에 CSV 형식의 데이터를 업로드하고 원하는 차트 타입을 선택해보세요.")
+    st.text_area("모둠별 제공된 데이터에 대해 적어보세요 (데이터 종류, 범위 등)", key="data_analysis")
+    st.text_area("선택한 시각화 기법과 그 이유를 적어보세요", key="chosen_visualization")
+    st.text_area("시각화 설계안을 스케치해보세요 (간단한 설명)", key="visualization_design")
 
-    uploaded_file = st.file_uploader("CSV 파일 업로드", type="csv")
-    if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file)
-        st.write("데이터 미리보기:", df.head())
-
-        chart_type = st.selectbox("차트 유형 선택", ["scatter", "bar", "line"])
-        x_col = st.selectbox("X축 컬럼 선택", df.columns)
-        y_col = st.selectbox("Y축 컬럼 선택", df.columns)
-        color_col = st.selectbox("색상 그룹 컬럼(옵션)", ["None"]+list(df.columns))
-        if st.button("차트 생성"):
-            if color_col == "None":
-                color_col = None
-            fig = px.scatter(df, x=x_col, y=y_col, color=color_col) if chart_type == "scatter" else \
-                  px.bar(df, x=x_col, y=y_col, color=color_col) if chart_type == "bar" else \
-                  px.line(df, x=x_col, y=y_col, color=color_col)
-            st.plotly_chart(fig, use_container_width=True)
-
-        answer_activity2 = st.text_area("이 차트를 보고 파악할 수 있는 인사이트를 정리하세요.")
-       
-    else:
-        st.info("CSV 파일을 업로드해주세요.")
-
-
-elif page == "3차시: 시각화 결과 공유 및 개선":
-    st.title("3차시: 시각화 결과 공유 및 개선")
-    st.write("**이름:** (입력란)")
-    st.write("**모둠:** (입력란)")
-    st.write("**일자:** (입력란)")
-
+# 활동 3: 시각화 결과 공유 및 개선
+elif activity == "활동 3: 시각화 결과 공유 및 개선":
+    st.header("활동 3: 시각화 결과 공유 및 개선")
     st.subheader("A. 시각화 결과물 공유")
-    st.write("1. 다른 모둠의 시각화를 보고 인상 깊었던 점을 적어보세요.")
-    st.text_area("인상 깊었던 점", "")
-    st.write("2. 개선 아이디어나 질문을 적어보세요.")
-    st.text_area("개선 아이디어/질문", "")
-
+    st.text_area("다른 모둠의 시각화에서 인상 깊었던 점을 적어보세요", key="other_team_highlights")
+    st.text_area("개선 아이디어를 적어보세요", key="improvement_ideas")
+    
     st.subheader("B. 데이터 해석 및 활용 방안 모색")
-    st.write("1. 우리 모둠 시각화를 바탕으로 문제 해결 방안이나 정책 제안을 고민해보세요.")
-    st.text_area("문제 해결/정책 제안", "")
-    st.write("2. 시각화 자료를 개선할 수 있는 방법을 생각해보세요.")
-    st.text_area("개선 방안", "")
-
+    st.text_area("문제 해결 아이디어나 정책 제안을 적어보세요", key="problem_solving_ideas")
+    st.text_area("시각화 자료를 개선하기 위한 방안을 적어보세요", key="visualization_improvement")
+    
     st.subheader("C. 총괄 반성")
-    st.write("1. 이번 활동을 통해 배운 점을 정리하세요.")
-    st.text_area("배운 점", "")
-    st.write("2. 다른 주제에도 데이터 시각화를 활용한다면 어떤 점이 유용할까요?")
-    st.text_area("활용 방안", "")
+    st.text_area("이번 활동을 통해 배운 점을 자유롭게 적어보세요", key="lesson_learned")
+    st.text_area("다른 주제에서도 시각화를 활용할 방법을 적어보세요", key="future_utilization")
+    
+st.sidebar.write("모든 활동 결과는 다운로드 가능합니다.")
+if st.sidebar.button("결과 다운로드"):
+    st.write("📂 현재 활동 내용을 다운로드하세요.")
