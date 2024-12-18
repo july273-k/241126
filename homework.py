@@ -18,7 +18,7 @@ if activity == "활동 1: 역사적 사례 탐구":
     st.subheader("A. 나이팅게일의 로즈 다이어그램 관찰하기")
     st.write("### 1. 로즈 다이어그램 살펴보기")
     st.write("아래 이미지를 클릭하거나 마우스를 올려 확대해보세요.")
-    rose_diagram = Image.open("rose_diagram.jpg")  # 나이팅게일의 로즈 다이어그램 이미지 파일
+    rose_diagram = Image.open("nightingale_rose_diagram.png")  # 나이팅게일의 로즈 다이어그램 이미지 파일
     st.image(rose_diagram, caption="나이팅게일의 로즈 다이어그램", use_column_width=True)
     st.write("로즈 다이어그램은 **병사들의 사망 원인**을 시각적으로 보여줍니다.")
     
@@ -27,7 +27,7 @@ if activity == "활동 1: 역사적 사례 탐구":
     st.subheader("B. 존 스노우의 콜레라 지도 분석하기")
     st.write("### 1. 콜레라 지도 살펴보기")
     st.write("아래 이미지를 클릭하거나 마우스를 올려 확대해보세요.")
-    cholera_map = Image.open("cholera_map.jpg")  # 존 스노우 콜레라 지도 이미지 파일
+    cholera_map = Image.open("john_snow_cholera_map.jpg")  # 존 스노우 콜레라 지도 이미지 파일
     st.image(cholera_map, caption="존 스노우의 콜레라 지도", use_column_width=True)
     st.write("콜레라 지도는 **콜레라 발병의 원인을 추적**하기 위한 도구로 사용되었습니다.")
     
