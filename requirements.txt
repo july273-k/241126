@@ -1,11 +1,10 @@
-streamlit
+streamlit>=1.22.0
 pandas
-matplotlib
-plotly
-seaborn 
-streamlit-folium
 numpy
 gspread
 oauth2client
 plotly
-base64io
+matplotlib
+plotly
+seaborn 
+streamlit-folium
