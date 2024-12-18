@@ -4,7 +4,6 @@ import matplotlib.pyplot as plt
 
 # 데이터 로드
 file_path = "elements_data.csv"
-elements = pd.read_csv(file_path)
 
 # 메인 타이틀
 st.title("데이터와 과학적 탐구를 통한 주기적 경향성 학습")
